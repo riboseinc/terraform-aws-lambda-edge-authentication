@@ -3,7 +3,7 @@ variable "fn_name" {
   default = "terraform-aws-lambda-edge-authentication"
 }
 
-//https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-requirements-limits.html
+// Lambda limits https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html
 variable "fn_timeout" {
   default = 3
 }

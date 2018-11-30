@@ -1,6 +1,6 @@
 resource "template_dir" "this" {
-  source_dir      = "${path.module}/src"
-  destination_dir = "${path.module}/.archive"
+  source_dir      = "src"
+  destination_dir = ".archive"
 
   vars {
     BUCKET_NAME = "${var.bucket_name}"
