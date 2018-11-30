@@ -1,5 +1,4 @@
-variable "fn_name" {
-  type = "string"
+variable "name" {
   default = "terraform-aws-lambda-edge-authentication"
 }
 
@@ -8,22 +7,18 @@ variable "fn_timeout" {
   default = 3
 }
 
-variable "memory_size" {
+variable "fn_memory_size" {
   default = 128
 }
 
 variable "bucket_name" {
-  type = "string"
 }
 
 variable "bucket_key" {
-  type = "string"
 }
 
 variable "basic_user" {
-  type = "string"
 }
 
 variable "basic_password" {
-  type = "string"
 }

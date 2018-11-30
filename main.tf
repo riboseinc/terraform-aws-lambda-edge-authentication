@@ -1,6 +1,6 @@
 resource "template_dir" "this" {
-  source_dir      = "src"
-  destination_dir = ".archive"
+  source_dir      = "${path.module}/src"
+  destination_dir = "${path.module}/.archive"
 
   vars {
     BUCKET_NAME = "${var.bucket_name}"
@@ -29,10 +29,10 @@ resource "aws_lambda_function" "this" {
   filename         = "${data.archive_file.this.output_path}"
   source_code_hash = "${data.archive_file.this.output_base64sha256}"
 
-  function_name = "${var.fn_name}"
+  function_name = "${var.name}"
   handler       = "basic_auth.handler"
 
-  timeout     = "3"
-  memory_size = 128
+  timeout     = "${var.fn_timeout}"
+  memory_size = "${var.fn_memory_size}"
   publish     = true
 }
