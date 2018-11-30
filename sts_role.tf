@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "this" {
     ]
 
     resources = [
-      "*",
+      "arn:aws:logs:*:*:*"
     ]
   }
 
@@ -47,7 +47,7 @@ data "aws_iam_policy_document" "this" {
     ]
 
     resources = [
-      "*",
+      "${aws_lambda_function.this.arn}:*",
     ]
   }
 }
