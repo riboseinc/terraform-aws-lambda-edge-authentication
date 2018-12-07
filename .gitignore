@@ -1,3 +1,6 @@
 .archive*
 .idea/
 .iml
+*.zip
+.archive
+.terraform
