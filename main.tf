@@ -30,7 +30,7 @@ resource "aws_lambda_function" "this" {
   source_code_hash = "${data.archive_file.this.output_base64sha256}"
 
   function_name = "${var.name}"
-  handler       = "basic_auth.handler"
+  handler       = "main.handler"
 
   timeout     = "${var.fn_timeout}"
   memory_size = "${var.fn_memory_size}"
