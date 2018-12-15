@@ -1,18 +1,32 @@
 import {readFileSync} from "fs";
-import * as AWS from 'aws-sdk';
+import {resolve} from "path";
+import {assign} from 'lodash';
+import {isMatch} from 'micromatch';
 
 export class BasicAuth {
 
-    private s3 = new AWS.S3();
-    
+    private readonly s3;
+
+    private bucket_name: string;
+    private bucket_key: string;
+    private basic_user: string;
+    private basic_pwd: string;
+
+    constructor() {
+        const AWS = require('aws-sdk');
+        this.s3 = new AWS.S3();
+
+        console.log(123);
+
+        const path = resolve("params.json");
+        const params = JSON.parse(readFileSync(path).toString());
+        assign(this, params);
+        console.log('this' + JSON.stringify(this));
+    }
+
     async handler(event, context, callback) {
         const request = event.Records[0].cf.request;
         const uri = request.uri;
-
-        if (!'${BUCKET_NAME}') {
-            console.log(`Bucket not defined (key is empty) => ignore`);
-            return callback(null, request);
-        }
 
         try {
             const filesStr = await this.readRestrictedFiles();
@@ -20,22 +34,35 @@ export class BasicAuth {
                 throw new Error(`empty protect files => ignore`);
             }
 
-            const rawFiles = JSON.parse(filesStr);
-            if (!Array.isArray(rawFiles)) {
-                throw new Error('${BUCKET_KEY} is not any array => ignore')
+            const uriPatterns = JSON.parse(filesStr);
+            if (!Array.isArray(uriPatterns)) {
+                throw new Error('Bucket key is not a Json Array => ignore')
             }
-            const files = rawFiles.map(f => f.startsWith('/') ? f : '/' + f);
-            // @ts-ignore
-            if (!files.includes(uri)) {
-                throw new Error(uri + ` not protected`);
+
+            // const files = rawFiles.map(f => f.startsWith('/') ? f : '/' + f);
+            // // @ts-ignore
+            // if (!files.includes(uri)) {
+            //     throw new Error(uri + ` not protected`);
+            // }
+
+            let uriProtected = false;
+            for (let i = 0; !uriProtected && i < uriPatterns.length; ++i) {
+                const p = uriPatterns[i];
+                uriProtected = isMatch(uri, p);
             }
+
+            if (!uriProtected) {
+                return callback(null, request);
+            }
+
+            console.log('uri= ' + uri + ' is protected');
 
             const headers = request.headers;
 
-            const authUser = '${BASIC_USER}';
-            const authPass = '${BASIC_PWD}';
+            // const authUser = this.basic_user;
+            // const authPass = this.bucket_pwd;
 
-            const authString = 'Basic ' + new Buffer(authUser + ':' + authPass).toString('base64');
+            const authString = 'Basic ' + new Buffer(this.basic_user + ':' + this.basic_pwd).toString('base64');
             if (typeof headers.authorization === 'undefined' || headers.authorization[0].value !== authString) {
                 const body = 'Unauthorized';
                 const response = {
@@ -56,7 +83,7 @@ export class BasicAuth {
     }
 
     async readRestrictedFiles() {
-        const params = {Bucket: '${BUCKET_NAME}', Key: '${BUCKET_KEY}'};
+        const params = {Bucket: this.bucket_name, Key: this.bucket_key};
         const data = await this.s3.getObject(params).promise();
         return data.Body.toString();
     }

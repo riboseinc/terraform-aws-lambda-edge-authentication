@@ -22,9 +22,6 @@ data "aws_iam_policy_document" "this" {
     effect = "Allow"
 
     actions = [
-      "s3:GetBucketLocation",
-      "s3:ListBucket",
-      "s3:GetObject",
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:DescribeLogGroups",
@@ -36,6 +33,17 @@ data "aws_iam_policy_document" "this" {
 
     resources = [
       "arn:aws:logs:*:*:*"
+    ]
+  }
+
+  statement {
+    actions = [
+      //      "s3:GetBucketLocation",
+      //      "s3:ListBucket",
+      "s3:GetObject"
+    ]
+    resources = [//arn:aws:s3:::blacklisting.booppi.website.htaccess
+      "arn:aws:s3:::${var.bucket_name}:*"
     ]
   }
 

@@ -1,5 +1,5 @@
 locals {
-  bucket_name = "phuonghqh.booppi.website.htaccess"
+  bucket_name = "blacklisting.booppi.website.htaccess"
   bucket_key = "htaccess.json"
   basic_user = "test"
   basic_password = "test"

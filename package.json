@@ -1,17 +1,18 @@
 {
   "name": "terraform-aws-lambda-edge-authentication",
   "scripts": {
-    "build": "webpack --mode production --devtool null --config webpack.config.js"
+    "build": "webpack --mode production --config webpack.config.js"
   },
   "devDependencies": {
-    "@types/node": "~10.12.3",
-    "webpack": "~4.17.1",
-    "webpack-cli": "~3.1.0",
-    "ts-loader": "~4.5.0",
-    "ts-node": "~7.0.1",
-    "tslint": "~5.10.0",
-    "typescript": "~3.1.6",
-    "glob": "^7.1.3",
-    "aws-sdk": "^2.373.0"
+    "@types/node": "^10.12.3",
+    "aws-sdk": "^2.373.0",
+    "lodash": "^4.17.11",
+    "micromatch": "^3.1.10",
+    "ts-loader": "^4.5.0",
+    "ts-node": "^7.0.1",
+    "tslint": "^5.10.0",
+    "typescript": "^3.1.6",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0"
   }
 }
