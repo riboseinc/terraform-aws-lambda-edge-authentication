@@ -22,7 +22,7 @@ const commonConfig = {
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx']
-    },
+    }
 };
 
 module.exports = [

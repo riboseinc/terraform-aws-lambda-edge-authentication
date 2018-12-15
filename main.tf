@@ -1,6 +1,5 @@
-resource "template_dir" "this" {
-  source_dir      = "${path.module}/src"
-  destination_dir = "${path.module}/.archive"
+resource "template_file" "this" {
+  template = "${file("${path.module}/src/params.json")}"
 
   vars {
     BUCKET_NAME = "${var.bucket_name}"
@@ -11,14 +10,28 @@ resource "template_dir" "this" {
   }
 }
 
+resource "local_file" "params" {
+  content     = "${template_file.this.rendered}"
+  filename = "${path.module}/.archive/params.json"
+}
+
+data "local_file" "mainjs" {
+  filename = "${path.module}/src/main.js"
+}
+
+resource "local_file" "mainjs" {
+  content     = "${data.local_file.mainjs.content}"
+  filename = "${path.module}/.archive/main.js"
+}
+
 data "archive_file" "this" {
   depends_on = [
-    "template_dir.this",
+    "local_file.params", "local_file.mainjs"
   ]
 
   type        = "zip"
   output_path = "${path.module}/.archive.zip"
-  source_dir  = "${template_dir.this.destination_dir}"
+  source_dir  = "${path.module}/.archive"
 }
 
 resource "aws_lambda_function" "this" {

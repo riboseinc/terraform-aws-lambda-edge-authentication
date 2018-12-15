@@ -29,7 +29,6 @@ variable "allowed_ips" {
   default = [ "0.0.0.0/0" ]
 }
 
-# Using this module
 module "main" {
 //  source = "https://github.com/riboseinc/terraform-aws-s3-cloudfront-website"
   source = "/Users/capitant/working/terraform-aws-s3-cloudfront-website"
