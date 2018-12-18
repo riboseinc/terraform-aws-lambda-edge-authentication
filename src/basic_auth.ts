@@ -16,12 +16,9 @@ export class BasicAuth {
         const AWS = require('aws-sdk');
         this.s3 = new AWS.S3();
 
-        console.log(123);
-
         const path = resolve("params.json");
         const params = JSON.parse(readFileSync(path).toString());
         assign(this, params);
-        console.log('this' + JSON.stringify(this));
     }
 
     async handler(event, context, callback) {
@@ -38,12 +35,6 @@ export class BasicAuth {
             if (!Array.isArray(uriPatterns)) {
                 throw new Error('Bucket key is not a Json Array => ignore')
             }
-
-            // const files = rawFiles.map(f => f.startsWith('/') ? f : '/' + f);
-            // // @ts-ignore
-            // if (!files.includes(uri)) {
-            //     throw new Error(uri + ` not protected`);
-            // }
 
             let uriProtected = false;
             for (let i = 0; !uriProtected && i < uriPatterns.length; ++i) {

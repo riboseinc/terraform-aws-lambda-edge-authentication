@@ -38,12 +38,10 @@ data "aws_iam_policy_document" "this" {
 
   statement {
     actions = [
-      //      "s3:GetBucketLocation",
-      //      "s3:ListBucket",
       "s3:GetObject"
     ]
-    resources = [//arn:aws:s3:::blacklisting.booppi.website.htaccess
-      "arn:aws:s3:::${var.bucket_name}:*"
+    resources = [
+      "arn:aws:s3:::${var.bucket_name}/*"
     ]
   }
 
@@ -55,7 +53,7 @@ data "aws_iam_policy_document" "this" {
     ]
 
     resources = [
-      "${aws_lambda_function.this.arn}:*",
+      "${aws_lambda_function.this.arn}",
     ]
   }
 }

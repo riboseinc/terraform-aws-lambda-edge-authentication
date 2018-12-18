@@ -1,4 +1,4 @@
 [
-  "sample.png",
-  "private/*.png"
+  "/sample.png",
+  "/private/*.png"
 ]
