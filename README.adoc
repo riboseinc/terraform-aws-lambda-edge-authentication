@@ -1,0 +1,16 @@
+= terraform-aws-lambda-edge-authentication
+
+== Create the "access permission" file
+
+The module use https://github.com/micromatch/micromatch[micromatch] to implement wildcard and glob matching URIs. +
+So all https://github.com/micromatch/micromatch#matching-features[Micromatch Features] is supported
+
+Files in example bellow require Basic Authentication to view
+
+[source,json]
+----
+[
+  "/sample.png",
+  "/sample/*.png"
+]
+----
