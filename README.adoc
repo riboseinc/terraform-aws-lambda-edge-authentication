@@ -5,12 +5,19 @@
 The module use https://github.com/micromatch/micromatch[micromatch] to implement wildcard and glob matching URIs. +
 So all https://github.com/micromatch/micromatch#matching-features[Micromatch Features] is supported
 
-Files in example bellow require Basic Authentication to view
-
+Blacklisting Files in example bellow require Basic Authentication to view
 [source,json]
 ----
 [
-  "/sample.png",
-  "/sample/*.png"
+  "/sample.png", // protect particular file
+  "/sample/*.png" //Protect all files inside a subdirectory
+]
+----
+
+Whitelisting publicly accessible files
+[source,json]
+----
+[
+  "!/sample.png" // not protect particular file => others are protected
 ]
 ----
