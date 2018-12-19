@@ -16,7 +16,7 @@ variable "allowed_ips" {
 }
 
 variable "s3_access_name" {
-  default = "permissions"
+  default = "mysite.htaccess"
 }
 
 variable "s3_access_key" {
