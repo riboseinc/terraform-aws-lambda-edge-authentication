@@ -21,3 +21,8 @@ Whitelisting publicly accessible files
   "!/sample.png" // not protect particular file => others are protected
 ]
 ----
+
+
+== Development
+  1. Run `npm run build` to build the lambda typescript code => `main.js` is generated
+  2. Rerun `terraform apply` to upload new `main.js`
