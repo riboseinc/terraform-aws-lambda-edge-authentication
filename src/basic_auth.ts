@@ -17,7 +17,8 @@ export class BasicAuth {
         this.s3 = new AWS.S3();
 
         const path = resolve("params.json");
-        const params = JSON.parse(readFileSync(path).toString());
+        let text = readFileSync(path).toString();
+        const params = JSON.parse(text);
         assign(this, params);
     }
 
@@ -53,7 +54,11 @@ export class BasicAuth {
             // const authUser = this.basic_user;
             // const authPass = this.bucket_pwd;
 
+            // console.log(this.basic_user);
+            // console.log(this.basic_pwd);
             const authString = 'Basic ' + new Buffer(this.basic_user + ':' + this.basic_pwd).toString('base64');
+            // console.log(authString);
+            // console.log(JSON.stringify(headers));
             if (typeof headers.authorization === 'undefined' || headers.authorization[0].value !== authString) {
                 const body = 'Unauthorized';
                 const response = {
