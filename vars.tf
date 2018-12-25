@@ -11,14 +11,17 @@ variable "fn_memory_size" {
   default = 128
 }
 
+#lambda config bucket
 variable "bucket_name" {
 }
 
+#lambda config key
 variable "bucket_key" {
+  default = "config.json"
 }
 
-variable "basic_user" {
-}
-
-variable "basic_password" {
-}
+//variable "basic_user" {
+//}
+//
+//variable "basic_password" {
+//}
