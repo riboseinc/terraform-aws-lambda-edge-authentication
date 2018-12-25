@@ -15,12 +15,12 @@ variable "allowed_ips" {
   default = [ "0.0.0.0/0" ]
 }
 
-variable "s3_access_name" {
+variable "config_bucket_name" {
   default = "mysite.htaccess"
 }
 
-variable "s3_access_key" {
-  default = "htaccess.json"
+variable "config_bucket_key" {
+  default = "config.json"
 }
 
 variable "lambda_basic_username" {

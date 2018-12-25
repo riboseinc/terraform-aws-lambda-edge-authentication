@@ -1,6 +1,4 @@
 {
   "bucket_name": "${BUCKET_NAME}",
-  "bucket_key": "${BUCKET_KEY}",
-  "basic_user": "${BASIC_USER}",
-  "basic_pwd": "${BASIC_PWD}"
+  "bucket_key": "${BUCKET_KEY}"
 }
