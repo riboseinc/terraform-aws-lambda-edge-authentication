@@ -4,9 +4,6 @@ resource "template_file" "this" {
   vars {
     BUCKET_NAME = "${var.bucket_name}"
     BUCKET_KEY  = "${var.bucket_key}"
-
-//    BASIC_USER = "${var.basic_user}"
-//    BASIC_PWD  = "${var.basic_password}"
   }
 }
 

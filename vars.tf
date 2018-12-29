@@ -19,9 +19,3 @@ variable "bucket_name" {
 variable "bucket_key" {
   default = "config.json"
 }
-
-//variable "basic_user" {
-//}
-//
-//variable "basic_password" {
-//}
