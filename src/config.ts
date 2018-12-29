@@ -1,6 +1,5 @@
 import {assign} from 'lodash';
 import {Utils} from "./utils";
-import {createHash} from 'crypto';
 import {HtpasswdAuth} from "./htpasswd-auth";
 
 

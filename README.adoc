@@ -1,6 +1,20 @@
 = terraform-aws-lambda-edge-authentication
 
-== Create the "access permission" file
+== Create the configuration file
+
+Sample:
+[source,json]
+----
+{
+  /* store usernames and password for basic authentication of HTTP users in "htpasswd" Format */
+  "htpasswd": "test:$apr1$uRhlu4OE$c5XdFhXUjm9PJtyyhI8WN/",
+
+  /* wildcard matching uris */
+  "uriPatterns": [
+    "/*.{png,txt}"
+  ]
+}
+----
 
 The module use https://github.com/micromatch/micromatch[micromatch] to implement wildcard and glob matching URIs. +
 So all https://github.com/micromatch/micromatch#matching-features[Micromatch Features] is supported
@@ -25,4 +39,4 @@ Whitelisting publicly accessible files
 
 == Development
   1. Run `npm run build` to build the lambda typescript code => `main.js` is generated
-  2. Rerun `terraform apply` to upload new `main.js`
+  2. Rerun `terraform apply` to upload new `main.js` (webpack compiled entry)
