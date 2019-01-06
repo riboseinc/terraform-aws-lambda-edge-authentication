@@ -37,7 +37,7 @@ export class BasicAuth {
         this.callback = callback;
 
         const cookies = this.request.headers.cookie || [];
-        this.cookie = cookies.find(c => c.value.startsWith(CookieName));
+        this.cookie = cookies.find(c => c.value.startsWith(CookieName)) || {};
 
         // this.cookie = this.request.headers.cookie;
         this.requestUri = this.request.uri;
