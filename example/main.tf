@@ -29,6 +29,6 @@ module "main" {
   }
 
   lambda_edge_enabled = "true"
-  lambda_edge_event_type = "origin-request"
+  lambda_edge_event_type = "viewer-request"
   lambda_edge_arn_version = "${module.lambda.arn}:${module.lambda.version}"
 }
