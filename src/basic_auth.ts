@@ -59,7 +59,7 @@ export class BasicAuth {
             }
 
             if (!uriProtected) {
-                return callback(null, this.request);
+                return this.forward();
             }
 
             console.log('uri= ' + this.requestUri + ' is protected');
@@ -76,6 +76,12 @@ export class BasicAuth {
             console.error(e);
             return this.internalError();
         }
+    }
+
+    private forward() {
+        const reply = this.isResponse ? this.response : this.request;
+        console.log(456, JSON.stringify(reply));
+        return this.callback(null, reply);
     }
 
     private internalError() {
@@ -161,6 +167,23 @@ export class BasicAuth {
         // const response = event.Records[0].cf.response;
         // const request = event.Records[0].cf.request;
 
+        // if (this.isResponse) {
+        //     extend(this.response.headers, {
+        //         "Set-Cookie": [{
+        //             key: 'Set-Cookie',
+        //             value: this.config.generateCookieValue(this.cookieDomain)
+        //         }]
+        //     });
+        // }
+
+        //
+        // console.log(response.headers);
+        // console.log(response.headers.length);
+
+        // const reply = this.isResponse ? this.response : this.request;
+        // console.log(JSON.stringify(reply));
+        // console.log(123, this.isResponse);
+
         if (this.isResponse) {
             extend(this.response.headers, {
                 "Set-Cookie": [{
@@ -170,23 +193,8 @@ export class BasicAuth {
             });
         }
 
-        //
-        // console.log(response.headers);
-        // console.log(response.headers.length);
-
         const reply = this.isResponse ? this.response : this.request;
-        // console.log(JSON.stringify(reply));
-        // console.log(123, this.isResponse);
-
-        if (this.isResponse) {
-            extend(reply.headers, {
-                "Set-Cookie": [{
-                    key: 'Set-Cookie',
-                    value: 'mycookiee=test; domain=mysite.booppi.website; max-age=3600;'
-                }]
-            });
-        }
-
+        console.log(123, JSON.stringify(reply));
         return this.callback(null, reply);
     }
 
