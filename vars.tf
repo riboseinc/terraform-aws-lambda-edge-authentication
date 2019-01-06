@@ -12,10 +12,12 @@ variable "fn_memory_size" {
 }
 
 #lambda config bucket
-variable "bucket_name" {
+variable "bucketName" {
 }
 
+variable "cookieDomain" {}
+
 #lambda config key
-variable "bucket_key" {
+variable "bucketKey" {
   default = "config.json"
 }

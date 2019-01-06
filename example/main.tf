@@ -2,14 +2,15 @@ module "lambda" {
   source = "../"
 
   # default key is "config.json"
-  bucket_name    = "${var.config_bucket_name}"
-  bucket_key     = "${var.config_bucket_key}"
+  bucketName = "${var.bucketName}"
+  bucketKey = "${var.bucketKey}"
+  cookieDomain = "${var.cookieDomain}"
 }
 
 
 module "main" {
   // PR for lambda enabled need to merged
-//  source = "https://github.com/riboseinc/terraform-aws-s3-cloudfront-website"
+  //  source = "https://github.com/riboseinc/terraform-aws-s3-cloudfront-website"
   source = "/Users/capitant/working/terraform-aws-s3-cloudfront-website"
 
   fqdn = "${var.fqdn}"

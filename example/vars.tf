@@ -4,7 +4,7 @@ variable "fqdn" {
   default     = "mysite.booppi.website"
 }
 
-variable "domain" {
+variable "cookieDomain" {
   description = "The domain name / ."
   default     = "booppi.website"
 }
@@ -15,11 +15,11 @@ variable "allowed_ips" {
   default = [ "0.0.0.0/0" ]
 }
 
-variable "config_bucket_name" {
+variable "bucketName" {
   default = "mysite.htaccess"
 }
 
-variable "config_bucket_key" {
+variable "bucketKey" {
   default = "config.json"
 }
 
