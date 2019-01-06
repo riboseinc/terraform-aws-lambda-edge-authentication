@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "this" {
       "s3:GetObject"
     ]
     resources = [
-      "arn:aws:s3:::${var.bucket_name}/*"
+      "arn:aws:s3:::${var.bucketName}/*"
     ]
   }
 

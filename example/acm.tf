@@ -25,7 +25,7 @@ resource "aws_acm_certificate_validation" "cert" {
 
 data "aws_route53_zone" "main" {
   provider     = "aws.main"
-  name         = "${var.domain}"
+  name         = "${var.cookieDomain}"
   private_zone = false
 }
 
