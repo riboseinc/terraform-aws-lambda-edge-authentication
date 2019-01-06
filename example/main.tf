@@ -10,8 +10,8 @@ module "lambda" {
 
 module "main" {
   // PR for lambda enabled need to merged
-  //  source = "https://github.com/riboseinc/terraform-aws-s3-cloudfront-website"
-  source = "/Users/capitant/working/terraform-aws-s3-cloudfront-website"
+    source = "https://github.com/riboseinc/terraform-aws-s3-cloudfront-website"
+//  source = "/Users/capitant/working/terraform-aws-s3-cloudfront-website"
 
   fqdn = "${var.fqdn}"
   ssl_certificate_arn = "${aws_acm_certificate_validation.cert.certificate_arn}"
@@ -30,6 +30,5 @@ module "main" {
   }
 
   lambda_edge_enabled = "true"
-  lambda_edge_event_type = "viewer-request"
   lambda_edge_arn_version = "${module.lambda.arn}:${module.lambda.version}"
 }
