@@ -15,6 +15,10 @@ export class Config {
     }
 
     async htpasswdAuthenticated(basicAuth: string): Promise<boolean> {
+        if (!basicAuth) {
+            return false;
+        }
+
         const [user, pass] = Utils.parseBasicAuth(basicAuth);
         const authenticated = await HtpasswdAuth.authenticate(user, pass, this.htpasswd);
         return authenticated;
