@@ -1,42 +1,296 @@
-= terraform-aws-lambda-edge-authentication
+= Terraform module for S3 website authentication via Lambda and CloudFront@Edge
 
-== Create the configuration file
+This module provides an AWS Lambda function that works together
+with CloudFront@Edge to authenticate S3 website resources (paths).
 
-Sample:
+This module is developed for
+https://github.com/riboseinc/terraform-aws-s3-cloudfront-website[terraform-aws-s3-cloudfront-website],
+which helps set up a full static website using using S3, CloudFront and ACM.
+
+NOTE: This module utilizes AWS Lambda -- a paid resource.
+Keep this in mind when adopting this solution.
+
+NOTE: If you're using this module with https://github.com/riboseinc/terraform-aws-s3-cloudfront-website[terraform-aws-s3-cloudfront-website], please refer to its website for further instructions.
+Certain AWS quirks with regions are specifically explained there.
+
+
+== How it works
+
+This module works through applying an AWS Lambda HTTP authentication function
+to the CloudFront@Edge distribution of the static website.
+
+Specifically, this Lambda function is executed on every access to the site to check whether:
+
+. the path being access should be protected
+. if so, authenticate the client:
+.. if the client was previously authentication (and therefore carries a cookie), allow
+.. with an HTTP authentication, if it matches the configuration, allow
+. if the client is allowed, place (or update) the cookie to allow for further access.
+
+
+== Setting up the module
+
+Two things are required:
+
+. A permission configuration file, used to configure the Lambda function for authentication.
+. Configuration in Terraform that deploys this module.
+
+
+== Configuration
+
+To allow the Lambda function to be configurable dynamically
+(i.e. the configuration is not bound to Terraform), the configuration file
+(in JSON) is located in an S3 bucket that Terraform may or may not
+have access to.
+
+NOTE: You could also manually create/update the configuration file.
+
+You will need to create (or re-use) a S3 bucket to store the configuration
+file, and this configuration file must be readable for the Lambda function.
+
+The configuration file does two things:
+
+. Specifies a set of paths that are "`protected`" (i.e. authentication is required)
+. Specifies a set of usernames and passwords via `htpasswd`
+  (the typical basic HTTP authentication method)
+
+=== Authentication credentials
+
+https://httpd.apache.org/docs/current/programs/htpasswd.html[`htpasswd` format]
+allows specification of usernames and password in a single file/string:
+
+* each line (`\n`) contains one username and its corresponding password
+* within each line the username and password are separated by a colon (`:`)
+
+For example:
+[source,htpasswd]
+----
+foobar:$2y$05$1h9cwwFusLcZCIUpdM7Gke.ei1E2QV6ORH/ZmvbR4h2tDGHb7q8lW
+zeebaa:$2y$05$aWBOi47GEOOoNB/ZUgdPY.NukDalyc.Bvn.S0aOlKDD9wp0R9mQHm
+----
+
+Assume you want to create a user called `foobar` with a password `FooBar#PassW0RD`.
+
+Run `htaccess` to generate access credentials to upload:
+
+[source,sh]
+----
+$ htpasswd -nbB foobar FooBar#PassW0RD
+foobar:$2y$05$1h9cwwFusLcZCIUpdM7Gke.ei1E2QV6ORH/ZmvbR4h2tDGHb7q8lW
+----
+
+
+NOTE: This command uses `bcrypt` to store the password hash. While it is
+the best choice out of available `htpasswd` algorithms (MD5, SHA1, crypt),
+remember that by default there is no rate limiting on the Lambda function
+-- meaning that someone can brute force the passwords via the public interface.
+(You could use the `reserved_concurrent_executions` option to limit
+Lambda concurrency.)
+
+=== Protected paths patterns
+
+
+The module uses
+https://github.com/micromatch/micromatch[micromatch] to implement
+wildcard and glob matching URIs, and all
+https://github.com/micromatch/micromatch#matching-features[Micromatch Features]
+are supported.
+
+==== Blacklisting paths
+
+These rules specify blacklisted paths.
+
+[source,js]
+----
+/* protect particular file */
+"/sample.png",
+----
+
+[source,js]
+----
+/* protects all files that end with `.png` inside a subdirectory */
+"/sample/*.png"
+----
+
+==== Whitelisting paths
+
+These rules whitelists otherwise publicly accessible files.
+
+[source,js]
+----
+/* do not protect this particular file => all others are protected */
+"!/sample.png"
+----
+
+==== Wildcards
+
+Notice that a full wildcard require double asterisks.
+
+[source,js]
+----
+/* all files (i.e. the whole site) */
+"**"
+----
+
+[source,js]
+----
+/* all files that end in `.png` in the whole site */
+"**/*.png"
+----
+
+[source,js]
+----
+/* all files inside the `/secret/` subdirectory */
+"/secret/**"
+----
+
+=== Creating the configuration file
+
+In the configuration file:
+
+* the `htpassword` portion is serialized into a single string
+* the protected paths patterns are specified individually.
+
+For example:
+
 [source,json]
 ----
 {
-  /* store usernames and password for basic authentication of HTTP users in "htpasswd" Format */
-  "htpasswd": "test:$apr1$uRhlu4OE$c5XdFhXUjm9PJtyyhI8WN/",
+  /* store usernames and password in "htpasswd" format */
+  "htpasswd": "foobar:$2y$05$1h9cwwFusLcZCIUpdM7Gke.ei1E2QV6ORH/ZmvbR4h2tDGHb7q8lW\nzeebaa:$2y$05$aWBOi47GEOOoNB/ZUgdPY.NukDalyc.Bvn.S0aOlKDD9wp0R9mQHm",
 
-  /* wildcard matching uris */
+  /* path patterns to protect in micromatch syntax */
   "uriPatterns": [
-    "/*.{png,txt}"
+
+    /* all files that end with `.png` or `.sh` in the first level */
+    "/*.{png,sh}",
+
+    /* all files regardless of depth */
+    "**"
   ]
 }
 ----
 
-The module use https://github.com/micromatch/micromatch[micromatch] to implement wildcard and glob matching URIs. +
-So all https://github.com/micromatch/micromatch#matching-features[Micromatch Features] is supported
 
-Blacklisting Files in example bellow require Basic Authentication to view
-[source,json]
+== Deploying this module
+
+Create an S3 bucket and upload the configuration JSON file.
+
+[source,hcl]
 ----
-[
-  "/sample.png", // protect particular file
-  "/sample/*.png" //Protect all files inside a subdirectory
-]
+provider "aws" {
+  region = "us-east-1"
+  #description = "AWS Region for Cloudfront (ACM certs only supports us-east-1)"
+  alias = "cloudfront"
+}
+
+resource "aws_s3_bucket" "permissions" {
+  bucket = "my-site-permissions"
+  acl    = "private"
+  provider = "aws.cloudfront"
+}
+
+resource "aws_s3_bucket_object" "permissions" {
+  bucket = "${aws_s3_bucket.permissions.bucket}"
+  key    = "config.json"
+
+  # Assume that your configuration JSON file is stored locally at `config.json`
+  source = "./config.json"
+  etag = "${filemd5("./config.json")}"
+
+  provider = "aws.cloudfront"
+}
 ----
 
-Whitelisting publicly accessible files
-[source,json]
+Create the authentication Lambda function. Remember that it must
+use the same provider (same region) as the S3 bucket did.
+
+[source,hcl]
 ----
-[
-  "!/sample.png" // not protect particular file => others are protected
-]
+module "staging-lambda" {
+  source = "github.com/riboseinc/terraform-aws-lambda-edge-authentication"
+
+  /* S3 bucket that stores configuration JSON file. */
+  bucketName = "${aws_s3_bucket.permissions.bucket}"
+
+  /* S3 object name of the configuration JSON file in the above bucket. */
+  bucketKey = "${aws_s3_bucket_object.permissions.key}"
+
+  /* the domain scope of cookie to be set */
+  cookieDomain = "my-s3-website-domain-name.com"
+
+  providers {
+    "aws" = "aws.cloudfront"
+  }
+}
 ----
+
+Then you have to associate the Lambda function with your CloudFront distribution
+using CloudFront@Edge.
+
+[source,hcl]
+----
+resource "aws_cloudfront_distribution" "main-lambda-edge" {
+
+  provider     = "aws.cloudfront"
+  enabled      = true
+  http_version = "http2"
+  aliases      = "..."
+
+  origin {
+    # ...
+
+    # Use a secret to authenticate CloudFront requests to origin
+    custom_header {
+      name  = "User-Agent"
+      value = "${var.refer_secret}"
+    }
+  }
+
+  default_cache_behavior {
+    # ...
+
+    # Link the Lambda function to CloudFront request
+    # for authenticating
+    lambda_function_association {
+      event_type = "viewer-request"
+      lambda_arn = "${var.lambda_edge_arn_version}"
+    }
+
+    # Link the Lambda function to CloudFront response
+    # for setting the authenticated cookie
+    lambda_function_association {
+      event_type = "viewer-response"
+      lambda_arn = "${var.lambda_edge_arn_version}"
+    }
+  }
+}
+----
+
+
+Now run `terraform apply` and see everything being setup.
+
+
+== Confirming functionality
+
+To confirm this works:
+
+. Visit a protected path in the browser and confirm that HTTP authentication
+  is required. (You'll be prompted to log in.)
+
+. Visit a protected path again in a browser, but this time with caches disabled.
+  Check whether a cookie has been set in your request -- it should have been
+  set in the previous successful authentication. It's working properly if you
+  see it.
+
+How awesome is this!
+
+NOTE: If you're using this module with https://github.com/riboseinc/terraform-aws-s3-cloudfront-website[terraform-aws-s3-cloudfront-website], please refer to its website for further instructions.
+Certain AWS quirks with regions are specifically explained there.
+
 
 
 == Development
-  1. Run `npm run build` to build the lambda typescript code => `main.js` is generated
-  2. Rerun `terraform apply` to upload new `main.js` (webpack compiled entry)
+
+. Run `npm run build` to build the lambda typescript code => `main.js` is generated
+. Rerun `terraform apply` to upload new `main.js` (webpack compiled entry)
