@@ -32,16 +32,16 @@ data "aws_iam_policy_document" "this" {
     ]
 
     resources = [
-      "arn:aws:logs:*:*:*"
+      "arn:aws:logs:*:*:*",
     ]
   }
 
   statement {
     actions = [
-      "s3:GetObject"
+      "s3:GetObject",
     ]
     resources = [
-      "arn:aws:s3:::${var.bucketName}/*"
+      "arn:aws:s3:::${var.bucketName}/*",
     ]
   }
 
@@ -53,18 +53,19 @@ data "aws_iam_policy_document" "this" {
     ]
 
     resources = [
-      "${aws_lambda_function.this.arn}",
+      aws_lambda_function.this.arn,
     ]
   }
 }
 
 resource "aws_iam_role_policy" "this" {
-  name   = "${var.name}"
-  role   = "${aws_iam_role.this.id}"
-  policy = "${data.aws_iam_policy_document.this.json}"
+  name   = var.name
+  role   = aws_iam_role.this.id
+  policy = data.aws_iam_policy_document.this.json
 }
 
 resource "aws_iam_role" "this" {
-  name               = "${var.name}"
-  assume_role_policy = "${data.aws_iam_policy_document.sts.json}"
+  name               = var.name
+  assume_role_policy = data.aws_iam_policy_document.sts.json
 }
+
