@@ -16,7 +16,7 @@ variable "allowed_ips" {
 }
 
 variable "bucketName" {
-  default = "mysite.htaccess"
+  default = "mysite.htaccess2"
 }
 
 variable "bucketKey" {

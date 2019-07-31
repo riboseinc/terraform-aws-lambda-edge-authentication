@@ -28,7 +28,7 @@ module "main" {
     aws.cloudfront = aws.cloudfront
   }
 
-  lambda_edge_enabled     = "false"
+  lambda_edge_enabled     = "true"
   lambda_edge_arn_version = "${module.lambda.arn}:${module.lambda.version}"
 }
 
