@@ -11,12 +11,12 @@ variable "cookieDomain" {
 
 # Allowed IPs that can directly access the S3 bucket
 variable "allowed_ips" {
-  type = "list"
-  default = [ "0.0.0.0/0" ]
+  type    = list(string)
+  default = ["0.0.0.0/0"]
 }
 
 variable "bucketName" {
-  default = "mysite.htaccess"
+  default = "mysite.htaccess2"
 }
 
 variable "bucketKey" {
@@ -30,3 +30,4 @@ variable "lambda_basic_username" {
 variable "lambda_basic_password" {
   default = "test"
 }
+
