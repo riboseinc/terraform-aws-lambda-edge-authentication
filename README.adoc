@@ -54,6 +54,7 @@ The configuration file does two things:
 . Specifies a set of usernames and passwords via `htpasswd`
   (the typical basic HTTP authentication method)
 
+
 === Authentication credentials
 
 https://httpd.apache.org/docs/current/programs/htpasswd.html[`htpasswd` format]
@@ -87,14 +88,17 @@ remember that by default there is no rate limiting on the Lambda function
 (You could use the `reserved_concurrent_executions` option to limit
 Lambda concurrency.)
 
-=== Protected paths patterns
 
+
+
+=== Protected paths patterns
 
 The module uses
 https://github.com/micromatch/micromatch[micromatch] to implement
 wildcard and glob matching URIs, and all
 https://github.com/micromatch/micromatch#matching-features[Micromatch Features]
 are supported.
+
 
 ==== Blacklisting paths
 
@@ -144,14 +148,15 @@ Notice that a full wildcard require double asterisks.
 "/secret/**"
 ----
 
-=== Creating the configuration file
+
+=== Structure of the configuration file
 
 In the configuration file:
 
 * the `htpassword` portion is serialized into a single string
 * the protected paths patterns are specified individually.
 
-For example:
+JSON example:
 
 [source,json]
 ----
@@ -172,7 +177,10 @@ For example:
 ----
 
 
+
 == Deploying this module
+
+=== S3 configuration
 
 Create an S3 bucket and upload the configuration JSON file.
 
@@ -187,20 +195,23 @@ provider "aws" {
 resource "aws_s3_bucket" "permissions" {
   bucket = "my-site-permissions"
   acl    = "private"
-  provider = "aws.cloudfront"
+  provider = aws.cloudfront
 }
 
 resource "aws_s3_bucket_object" "permissions" {
-  bucket = "${aws_s3_bucket.permissions.bucket}"
+  bucket = aws_s3_bucket.permissions.bucket
   key    = "config.json"
 
   # Assume that your configuration JSON file is stored locally at `config.json`
   source = "./config.json"
-  etag = "${filemd5("./config.json")}"
+  etag = filemd5("./config.json")
 
-  provider = "aws.cloudfront"
+  provider = aws.cloudfront
 }
 ----
+
+
+=== Lambda function
 
 Create the authentication Lambda function. Remember that it must
 use the same provider (same region) as the S3 bucket did.
@@ -211,19 +222,22 @@ module "staging-lambda" {
   source = "github.com/riboseinc/terraform-aws-lambda-edge-authentication"
 
   /* S3 bucket that stores configuration JSON file. */
-  bucketName = "${aws_s3_bucket.permissions.bucket}"
+  bucketName = aws_s3_bucket.permissions.bucket
 
   /* S3 object name of the configuration JSON file in the above bucket. */
-  bucketKey = "${aws_s3_bucket_object.permissions.key}"
+  bucketKey = aws_s3_bucket_object.permissions.key
 
   /* the domain scope of cookie to be set */
   cookieDomain = "my-s3-website-domain-name.com"
 
-  providers {
-    "aws" = "aws.cloudfront"
+  providers = {
+    aws = aws.cloudfront
   }
 }
 ----
+
+
+=== Cloudfront@Edge association to Lambda
 
 Then you have to associate the Lambda function with your CloudFront distribution
 using CloudFront@Edge.
@@ -232,7 +246,7 @@ using CloudFront@Edge.
 ----
 resource "aws_cloudfront_distribution" "main-lambda-edge" {
 
-  provider     = "aws.cloudfront"
+  provider     = aws.cloudfront
   enabled      = true
   http_version = "http2"
   aliases      = "..."
@@ -243,7 +257,7 @@ resource "aws_cloudfront_distribution" "main-lambda-edge" {
     # Use a secret to authenticate CloudFront requests to origin
     custom_header {
       name  = "User-Agent"
-      value = "${var.refer_secret}"
+      value = var.refer_secret
     }
   }
 
@@ -254,14 +268,14 @@ resource "aws_cloudfront_distribution" "main-lambda-edge" {
     # for authenticating
     lambda_function_association {
       event_type = "viewer-request"
-      lambda_arn = "${var.lambda_edge_arn_version}"
+      lambda_arn = var.lambda_edge_arn_version
     }
 
     # Link the Lambda function to CloudFront response
     # for setting the authenticated cookie
     lambda_function_association {
       event_type = "viewer-response"
-      lambda_arn = "${var.lambda_edge_arn_version}"
+      lambda_arn = var.lambda_edge_arn_version
     }
   }
 }
@@ -269,6 +283,52 @@ resource "aws_cloudfront_distribution" "main-lambda-edge" {
 
 
 Now run `terraform apply` and see everything being setup.
+
+
+== Simple management example
+
+WARNING: Not recommended for security as passwords are stored as plaintext!
+
+One simple way is to maintain the following files.
+It's much easier to add/remove passwords compared to the static JSON file.
+
+* `htpasswd.txt`: for storing plaintext credentials
+
+[source,txt]
+----
+CanadianMonkey Xz5Z&kWvd3XJ
+CaptainMagic Ta3tNk&aaC9v
+NewportGroove oaWNcHCqrK$E
+----
+
+* Use this command to generate the `htaccess` file:
+
+[source,sh]
+----
+cat htpasswd.txt | xargs -n2 bash -c 'htpasswd -bB htaccess $0 $1'
+----
+
+* In the permissions configuration JSON, remember to replace your allowance patterns:
+
+[source,hcl]
+----
+resource "aws_s3_bucket_object" "restricted_example_com_json" {
+  provider               = aws.main
+  key                    = "restricted.example.com.json"
+  bucket                 = aws_s3_bucket.main.id
+  server_side_encryption = "aws:kms"
+  content                = <<EOF
+{
+  "htpasswd": "${file("htaccess")}",
+  "uriPatterns": [
+    "**"
+  ]
+}
+EOF
+}
+----
+
+
 
 
 == Confirming functionality
