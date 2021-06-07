@@ -6,11 +6,19 @@ module "lambda" {
   bucketKey    = var.bucketKey
   cookieDomain = var.cookieDomain
 }
+/*
 
+
+module "s3-cloudfront-website" {
+  source  = "riboseinc/s3-cloudfront-website/aws"
+  version = "1.1.0"
+  # insert the 4 required variables here
+}
+
+*/
 module "main" {
-  source = "../../terraform-aws-s3-cloudfront-website"
-
-  //  source = "/Users/capitant/working/terraform-aws-s3-cloudfront-website"
+  source  = "riboseinc/s3-cloudfront-website/aws"
+  version = "1.1.0"
 
   fqdn                = var.fqdn
   ssl_certificate_arn = aws_acm_certificate_validation.cert.certificate_arn
@@ -28,7 +36,13 @@ module "main" {
     aws.cloudfront = aws.cloudfront
   }
 
-  lambda_edge_enabled     = "true"
-  lambda_edge_arn_version = "${module.lambda.arn}:${module.lambda.version}"
+  lambda_edges = [
+    {
+      event_type = "viewer-request"
+      lambda_arn = "${module.lambda.arn}:${module.lambda.version}"
+    }
+  ]
+//  lambda_edge_enabled     = "true"
+//  lambda_edge_arn_version = "${module.lambda.arn}:${module.lambda.version}"
 }
 
