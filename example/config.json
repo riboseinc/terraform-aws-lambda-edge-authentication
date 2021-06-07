@@ -1,7 +1,0 @@
-{
-  "htpasswd": "test:$apr1$uRhlu4OE$c5XdFhXUjm9PJtyyhI8WN/",
-  "uriPatterns": [
-    "/*.{png,txt}"
-  ],
-  "cookieMaxAgeInSeconds": 3600
-}

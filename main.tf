@@ -1,15 +1,4 @@
-//resource "template_file" "this" {
-//  template = file("${path.module}/src/params.json")
-//
-//  vars = {
-//    BUCKET_NAME   = var.bucketName
-//    BUCKET_KEY    = var.bucketKey
-//    COOKIE_DOMAIN = var.cookieDomain
-//  }
-//}
-
 resource "local_file" "params" {
-//  content  = template_file.this.rendered
   content = templatefile("${path.module}/src/params.json", {
         BUCKET_NAME   = var.bucketName
         BUCKET_KEY    = var.bucketKey
@@ -45,7 +34,7 @@ resource "aws_lambda_function" "this" {
   runtime     = "nodejs10.x"
 
   filename         = data.archive_file.this.output_path
-  source_code_hash = data.archive_file.this.output_base64sha256
+//  source_code_hash = data.archive_file.this.output_base64sha256
 
   function_name = var.name
   handler       = "main.handler"
