@@ -1,6 +1,5 @@
 import {readFileSync} from "fs";
 import {resolve} from "path";
-import {assign, isArray, extend, find} from 'lodash';
 import {isMatch} from 'micromatch';
 import {Config} from "./config";
 import {Utils} from "./utils";
@@ -26,7 +25,8 @@ export class BasicAuth {
         const path = resolve("params.json");
         let text = readFileSync(path).toString();
         const params = JSON.parse(text);
-        assign(this, params);
+        //assign(this, params);
+        Object.assign(this, params);
     }
 
     private initEvent(event: any, callback: any) {
@@ -64,7 +64,7 @@ export class BasicAuth {
             console.log('uri= ' + this.requestUri + ' is protected');
 
             const headers = this.request.headers;
-            const authenticatedStr = isArray(headers.authorization) ? headers.authorization[0].value : undefined;
+            const authenticatedStr = Array.isArray(headers.authorization) /*isArray(headers.authorization)*/ ? headers.authorization[0].value : undefined;
 
             const isAuthenticated = await this.config.htpasswdAuthenticated(authenticatedStr);
 
@@ -116,7 +116,7 @@ export class BasicAuth {
 
     private authorized() {
         if (this.isResponse) {
-            extend(this.response.headers, {
+            Object.assign(this.response.headers, {
                 "Set-Cookie": [{
                     key: 'Set-Cookie',
                     value: this.config.generateCookieValue(this.cookieDomain)

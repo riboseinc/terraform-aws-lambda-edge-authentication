@@ -5,7 +5,7 @@ resource "local_file" "params" {
         COOKIE_DOMAIN = var.cookieDomain
   })
 
-  filename = "${path.module}/.archive/params.json"
+  filename = "${path.module}/src-lamda/params.json"
 }
 
 data "local_file" "mainjs" {
@@ -14,7 +14,7 @@ data "local_file" "mainjs" {
 
 resource "local_file" "mainjs" {
   content  = data.local_file.mainjs.content
-  filename = "${path.module}/.archive/main.js"
+  filename = "${path.module}/src-lamda/main.js"
 }
 
 data "archive_file" "this" {
@@ -24,8 +24,8 @@ data "archive_file" "this" {
   ]
 
   type        = "zip"
-  output_path = "${path.module}/.archive.zip"
-  source_dir  = "${path.module}/.archive"
+  output_path = "${path.module}/src-lamda.zip"
+  source_dir  = "${path.module}/src-lamda"
 }
 
 resource "aws_lambda_function" "this" {
@@ -34,7 +34,7 @@ resource "aws_lambda_function" "this" {
   runtime     = "nodejs10.x"
 
   filename         = data.archive_file.this.output_path
-//  source_code_hash = data.archive_file.this.output_base64sha256
+  source_code_hash = data.archive_file.this.output_base64sha256
 
   function_name = var.name
   handler       = "main.handler"

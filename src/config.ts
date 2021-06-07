@@ -1,4 +1,3 @@
-import {assign} from 'lodash';
 import {Utils} from "./utils";
 import {HtpasswdAuth} from "./htpasswd-auth";
 import * as crypto from 'crypto';
@@ -11,7 +10,7 @@ export class Config {
 
     constructor(jsonStr: string) {
         const config = JSON.parse(jsonStr);
-        assign(this, config);
+        Object.assign(this, config);
     }
 
     async htpasswdAuthenticated(basicAuth: string): Promise<boolean> {
