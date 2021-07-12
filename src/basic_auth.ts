@@ -1,4 +1,4 @@
-import {readFileSync} from "fs";
+import {existsSync, readFileSync} from "fs";
 import {resolve} from "path";
 import {isMatch} from 'micromatch';
 import {Config} from "./config";
@@ -23,10 +23,19 @@ export class BasicAuth {
 
     constructor() {
         const path = resolve("params.json");
-        let text = readFileSync(path).toString();
-        const params = JSON.parse(text);
-        //assign(this, params);
-        Object.assign(this, params);
+        let params = {
+            bucketName: process.env.BUCKET_NAME,
+            bucketKey: process.env.BUCKET_KEY,
+            cookieDomain: process.env.COOKIE_DOMAIN,
+        }
+        if (existsSync(path)) {
+            let text = readFileSync(path).toString();
+            params = {...params, ...JSON.parse(text)};
+        }
+
+        this.bucketKey = params.bucketKey;
+        this.bucketName = params.bucketName;
+        this.cookieDomain = params.cookieDomain;
     }
 
     private initEvent(event: any, callback: any) {
