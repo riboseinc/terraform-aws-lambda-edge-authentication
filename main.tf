@@ -1,12 +1,12 @@
-//resource "local_file" "params" {
-//  content = templatefile("${path.module}/src/params.json", {
-//        BUCKET_NAME   = var.bucketName
-//        BUCKET_KEY    = var.bucketKey
-//        COOKIE_DOMAIN = var.cookieDomain
-//  })
-//
-//  filename = "${path.module}/src-lamda/params.json"
-//}
+resource "local_file" "params" {
+  content = templatefile("${path.module}/src/params.json", {
+        BUCKET_NAME   = var.bucketName
+        BUCKET_KEY    = var.bucketKey
+        COOKIE_DOMAIN = var.cookieDomain
+  })
+
+  filename = "${path.module}/src-lamda/params.json"
+}
 
 //data "local_file" "mainjs" {
 //  filename = "${path.module}/src/main.js"
@@ -34,6 +34,10 @@ resource "aws_cloudwatch_log_group" "this" {
 //}
 
 resource "null_resource" "zip" {
+  depends_on = [
+    local_file.params
+  ]
+
   provisioner "local-exec" {
     command = <<EOT
       zip -r "${path.module}/src-lamda.zip" "${path.module}/src-lamda"
@@ -64,12 +68,12 @@ resource "aws_lambda_function" "this" {
   memory_size = var.fn_memory_size
   publish     = true
 
-  environment {
-    variables = {
-      BUCKET_NAME   = var.bucketName
-      BUCKET_KEY    = var.bucketKey
-      COOKIE_DOMAIN = var.cookieDomain
-    }
-  }
+//  environment {
+//    variables = {
+//      BUCKET_NAME   = var.bucketName
+//      BUCKET_KEY    = var.bucketKey
+//      COOKIE_DOMAIN = var.cookieDomain
+//    }
+//  }
 }
 
