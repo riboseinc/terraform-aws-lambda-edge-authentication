@@ -23,16 +23,7 @@ export class BasicAuth {
 
     constructor() {
         const path = resolve("params.json");
-        let params = {
-            bucketName: process.env.BUCKET_NAME,
-            bucketKey: process.env.BUCKET_KEY,
-            cookieDomain: process.env.COOKIE_DOMAIN,
-        }
-        if (existsSync(path)) {
-            let text = readFileSync(path).toString();
-            params = {...params, ...JSON.parse(text)};
-        }
-
+        const params = JSON.parse(readFileSync(path).toString())
         this.bucketKey = params.bucketKey;
         this.bucketName = params.bucketName;
         this.cookieDomain = params.cookieDomain;
