@@ -56,7 +56,7 @@ resource "aws_lambda_function" "this" {
 
   description = "Basic HTTP authentication module/function"
   role        = aws_iam_role.this.arn
-  runtime     = "nodejs10.x"
+  runtime     = "nodejs16.x"
 
   filename         = "${path.module}/src-lamda.zip"
   source_code_hash = filebase64sha256("${path.module}/src-lamda/main.js")
